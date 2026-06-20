@@ -8,10 +8,10 @@ app = Flask(__name__)
 
 ROUTES = {
     "/api/users": os.getenv("USER_SERVICE_URL", "http://user-service:5001"),
-    "/api/foods": os.getenv("FOOD_SERVICE_URL", os.getenv("PRODUCT_SERVICE_URL", "http://product-service:5002")),
-    "/api/products": os.getenv("FOOD_SERVICE_URL", os.getenv("PRODUCT_SERVICE_URL", "http://product-service:5002")),
-    "/api/orders": os.getenv("ORDER_SERVICE_URL", "http://order-service:5003"),
-    "/api/cart": os.getenv("ORDER_SERVICE_URL", "http://order-service:5003"),
+    "/api/foods": os.getenv("PRODUCT_ORDER_SERVICE_URL", "http://product-order-service:5002"),
+    "/api/products": os.getenv("PRODUCT_ORDER_SERVICE_URL", "http://product-order-service:5002"),
+    "/api/orders": os.getenv("PRODUCT_ORDER_SERVICE_URL", "http://product-order-service:5002"),
+    "/api/cart": os.getenv("PRODUCT_ORDER_SERVICE_URL", "http://product-order-service:5002"),
 }
 
 

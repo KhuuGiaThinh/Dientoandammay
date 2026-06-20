@@ -5,12 +5,10 @@ services:
       - "5000:5000"
     environment:
       USER_SERVICE_URL: http://user-service:5001
-      FOOD_SERVICE_URL: http://food-service:5002
-      ORDER_SERVICE_URL: http://order-service:5003
+      PRODUCT_ORDER_SERVICE_URL: http://product-order-service:5002
     depends_on:
       - user-service
-      - food-service
-      - order-service
+      - product-order-service
     networks:
       - micronet
 
@@ -44,68 +42,35 @@ services:
       timeout: 3s
       retries: 20
 
-  food-service:
-    build: ./product-service
-    expose:
-      - "5002"
+  product-order-service:
+    build: ./product-order-service
+    ports:
+      - "5002:5002"
     environment:
-      DATABASE_URL: postgresql+psycopg2://food:pass@food-db:5432/fooddb
+      DATABASE_URL: postgresql+psycopg2://order_food:pass@product-order-db:5432/orderfooddb
+      USER_SERVICE_URL: http://user-service:5001
     depends_on:
-      food-db:
+      product-order-db:
         condition: service_healthy
+      user-service:
+        condition: service_started
     networks:
       - micronet
 
-  food-db:
+  product-order-db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: fooddb
-      POSTGRES_USER: food
+      POSTGRES_DB: orderfooddb
+      POSTGRES_USER: order_food
       POSTGRES_PASSWORD: pass
     ports:
       - "5434:5432"
     volumes:
-      - food_data:/var/lib/postgresql/data
+      - product_order_data:/var/lib/postgresql/data
     networks:
       - micronet
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U food -d fooddb"]
-      interval: 10s
-      timeout: 3s
-      retries: 20
-
-  order-service:
-    build: ./order-service
-    ports:
-      - "5003:5003"
-    environment:
-      DATABASE_URL: postgresql+psycopg2://order:pass@order-db:5432/orderdb
-      USER_SERVICE_URL: http://user-service:5001
-      FOOD_SERVICE_URL: http://food-service:5002
-    depends_on:
-      order-db:
-        condition: service_healthy
-      user-service:
-        condition: service_started
-      food-service:
-        condition: service_started
-    networks:
-      - micronet
-
-  order-db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: orderdb
-      POSTGRES_USER: order
-      POSTGRES_PASSWORD: pass
-    ports:
-      - "5435:5432"
-    volumes:
-      - order_data:/var/lib/postgresql/data
-    networks:
-      - micronet
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U order -d orderdb"]
+      test: ["CMD-SHELL", "pg_isready -U order_food -d orderfooddb"]
       interval: 10s
       timeout: 3s
       retries: 20
@@ -126,8 +91,7 @@ services:
 
 volumes:
   user_data:
-  food_data:
-  order_data:
+  product_order_data:
 
 networks:
   micronet:
