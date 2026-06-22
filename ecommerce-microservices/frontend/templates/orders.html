@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Đơn hàng — FoodNow{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0">Lịch sử đơn hàng</h4>
+  <span class="text-muted">Tổng: {{ pagination.total }}</span>
+</div>
+
+{% if orders %}
+<div class="d-grid gap-3">
+  {% for order in orders %}
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex flex-wrap justify-content-between gap-2">
+        <div>
+          <strong>#{{ order.id }}</strong>
+          <div class="small text-muted">{{ order.created_at }}</div>
+        </div>
+        <div>
+          {% if order.status == 'pending' %}
+            <span class="status-badge status-pending">🟡 Chờ xác nhận</span>
+          {% elif order.status == 'confirmed' %}
+            <span class="status-badge status-confirmed">🔵 Đã xác nhận</span>
+          {% elif order.status == 'preparing' %}
+            <span class="status-badge status-preparing">🟠 Đang chuẩn bị</span>
+          {% elif order.status == 'shipping' %}
+            <span class="status-badge status-shipping">🚚 Đang giao</span>
+          {% elif order.status == 'delivered' %}
+            <span class="status-badge status-delivered">🟢 Đã giao</span>
+          {% elif order.status == 'cancelled' %}
+            <span class="status-badge status-cancelled">🔴 Đã hủy</span>
+          {% endif %}
+        </div>
+      </div>
+      <hr>
+      <ul class="mb-2">
+        {% for item in order.items %}
+        <li>{{ item.food_name }} x {{ item.quantity }} ({{ "{:,.0f}".format(item.line_total) }}đ)</li>
+        {% endfor %}
+      </ul>
+      <div class="d-flex justify-content-between align-items-center">
+        <strong style="color:#FF6B35">{{ "{:,.0f}".format(order.total_price) }}đ</strong>
+        <div class="d-flex gap-2">
+          {% if order.status == 'pending' %}
+          <form method="post" action="{{ url_for('order_cancel', order_id=order.id) }}">
+            <button class="btn btn-outline-danger btn-sm">Hủy</button>
+          </form>
+          {% endif %}
+          <form method="post" action="{{ url_for('order_reorder', order_id=order.id) }}">
+            <button class="btn btn-outline-primary btn-sm">Đặt lại</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<nav class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% for p in range(1, pagination.pages + 1) %}
+      <li class="page-item {% if p == pagination.current_page %}active{% endif %}">
+        <a class="page-link" href="{{ url_for('orders', page=p) }}">{{ p }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>
+{% else %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body text-center text-muted py-5">Bạn chưa có đơn hàng nào.</div>
+</div>
+{% endif %}
+{% endblock %}
