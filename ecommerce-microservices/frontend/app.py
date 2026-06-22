@@ -32,12 +32,19 @@ def gateway_put(path, payload):
         return None
 
 
-def normalize_food_image_url(raw_image_url):
+def normalize_food_image_url(raw_image_url, food_id=None):
     filename = "default.jpg"
     if raw_image_url:
         candidate = Path(str(raw_image_url)).name
         if candidate:
             filename = candidate
+
+    if not (FOOD_IMAGE_DIR / filename).exists():
+        id_filename = f"{food_id}.jpg" if food_id is not None else ""
+        if id_filename and (FOOD_IMAGE_DIR / id_filename).exists():
+            filename = id_filename
+        else:
+            filename = "default.jpg"
 
     if not (FOOD_IMAGE_DIR / filename).exists():
         filename = "default.jpg"
@@ -50,7 +57,7 @@ def get_foods(filters=None):
     if response and response.status_code == 200:
         foods = response.json()
         for food in foods:
-            food["image_url"] = normalize_food_image_url(food.get("image_url"))
+            food["image_url"] = normalize_food_image_url(food.get("image_url"), food.get("id"))
         return foods, None
     return [], "Không tải được danh sách món ăn"
 
@@ -66,7 +73,7 @@ def get_food_detail(food_id):
     response = gateway_get(f"/api/foods/{food_id}")
     if response and response.status_code == 200:
         food = response.json()
-        food["image_url"] = normalize_food_image_url(food.get("image_url"))
+        food["image_url"] = normalize_food_image_url(food.get("image_url"), food.get("id"))
         return food, None
     return None, "Không tìm thấy món ăn"
 

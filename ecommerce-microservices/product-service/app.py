@@ -90,8 +90,8 @@ def seed_data():
     if db.session.execute(db.select(FoodItem.id)).first():
         return
 
-    for food in SAMPLE_FOODS:
-        image_filename = f"{slugify(food['name'])}.jpg"
+    for index, food in enumerate(SAMPLE_FOODS, start=1):
+        image_filename = f"{index}.jpg"
         db.session.add(
             FoodItem(
                 name=food["name"],
