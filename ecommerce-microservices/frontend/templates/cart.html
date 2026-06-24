@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Giỏ hàng — FoodNow{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h4 class="mb-3">Giỏ hàng của bạn</h4>
+        {% if cart_items %}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Món ăn</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Tổng</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart_items %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}" width="58" height="58" class="rounded" style="object-fit:cover">
+                    <div>
+                      <div class="fw-semibold">{{ item.name }}</div>
+                      <small class="text-muted">{{ item.restaurant }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ "{:,.0f}".format(item.price) }}đ</td>
+                <td>
+                  <div class="d-flex align-items-center gap-1">
+                    <form method="post">
+                      <input type="hidden" name="action" value="decrease">
+                      <input type="hidden" name="food_id" value="{{ item.food_id }}">
+                      <button class="btn btn-outline-secondary btn-sm" type="submit">-</button>
+                    </form>
+                    <span class="px-2">{{ item.quantity }}</span>
+                    <form method="post">
+                      <input type="hidden" name="action" value="increase">
+                      <input type="hidden" name="food_id" value="{{ item.food_id }}">
+                      <button class="btn btn-outline-secondary btn-sm" type="submit">+</button>
+                    </form>
+                  </div>
+                </td>
+                <td class="fw-semibold">{{ "{:,.0f}".format(item.line_total) }}đ</td>
+                <td>
+                  <form method="post">
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="food_id" value="{{ item.food_id }}">
+                    <button class="btn btn-outline-danger btn-sm" type="submit"><i class="bi bi-trash"></i></button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+          <div style="font-size: 3rem;">🛒</div>
+          Giỏ hàng đang trống.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h5 class="mb-3">Thanh toán</h5>
+        <form method="post">
+          <input type="hidden" name="action" value="checkout">
+          <div class="mb-3">
+            <label class="form-label">Địa chỉ giao hàng</label>
+            <textarea class="form-control" name="delivery_address" rows="2" placeholder="Nhập địa chỉ nhận món"></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ghi chú</label>
+            <textarea class="form-control" name="note" rows="2" placeholder="Ít cay, thêm muỗng, giao giờ nghỉ trưa..."></textarea>
+          </div>
+          <div class="d-flex justify-content-between mb-3">
+            <span>Tổng đơn</span>
+            <strong style="color:#FF6B35">{{ "{:,.0f}".format(total_price) }}đ</strong>
+          </div>
+          <button class="btn btn-primary w-100" type="submit" {% if not cart_items %}disabled{% endif %}>Thanh toán ngay</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

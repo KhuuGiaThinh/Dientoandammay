@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi" style="height: 100%;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FoodNow — Đặt Đồ Ăn Online{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap"></noscript>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --primary: #ff6b35; --primary-dark: #e55a28; --light: #fff7f3; }
+    body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; background: #f8f9fa; }
+    .navbar { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .navbar-brand { font-weight: 700; font-size: 1.4rem; color: var(--primary) !important; }
+    .btn-primary { background: var(--primary); border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+    .badge-cart { background: var(--primary); }
+    .food-card { border: none; border-radius: 16px; overflow: hidden; transition: transform .2s, box-shadow .2s; }
+    .food-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+    .food-card img { width: 100%; height: 200px; object-fit: cover; }
+    .category-pill { border-radius: 999px; padding: 6px 18px; cursor: pointer; border: 1.5px solid #ddd; background: #fff; font-size: .9rem; transition: all .2s; white-space: nowrap; }
+    .category-pill.active, .category-pill:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .status-badge { border-radius: 999px; font-size: .8rem; padding: 6px 12px; font-weight: 600; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-confirmed { background: #d1ecf1; color: #0c5460; }
+    .status-preparing { background: #ffe5b4; color: #994d00; }
+    .status-shipping { background: #d6e4ff; color: #1d4ed8; }
+    .status-delivered { background: #d4edda; color: #155724; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body style="min-height: 100%; display: flex; flex-direction: column;">
+<nav class="navbar navbar-expand-lg sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('home') }}">🍜 FoodNow</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <form class="d-flex mx-lg-auto my-2 my-lg-0" style="max-width:520px;width:100%" action="{{ url_for('home') }}" method="get">
+        <input class="form-control me-2" type="search" name="search" placeholder="Tìm món ăn, nhà hàng..." value="{{ request.args.get('search','') }}">
+        <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+      </form>
+      <div class="d-flex align-items-center gap-2 ms-lg-3">
+        <a href="{{ url_for('cart') }}" class="btn btn-outline-secondary position-relative">
+          <i class="bi bi-bag"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill badge-cart">
+            {{ cart_badge_count }}
+          </span>
+        </a>
+        <a href="{{ url_for('orders') }}" class="btn btn-outline-secondary"><i class="bi bi-receipt"></i></a>
+        {% if session.get('user_id') %}
+          <a href="{{ url_for('profile') }}" class="btn btn-link text-dark text-decoration-none">{{ session.get('username') }}</a>
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Đăng xuất</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-sm">Đăng nhập</a>
+          <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Đăng ký</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main style="flex: 1;">
+  <div class="container py-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<footer class="bg-dark text-white text-center py-4">
+  <p class="mb-0">🍜 FoodNow — Đặt đồ ăn nhanh, giao hàng tận nơi</p>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

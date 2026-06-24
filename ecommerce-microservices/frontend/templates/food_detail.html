@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{{ food.name }} — FoodNow{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <img src="{{ food.image_url }}" alt="{{ food.name }}" class="img-fluid rounded-4 shadow-sm w-100" style="max-height:420px; object-fit:cover" loading="lazy">
+  </div>
+  <div class="col-lg-6">
+    <span class="badge mb-2" style="background:#fff3e0;color:#e65100">{{ food.category }}</span>
+    <h2 class="fw-bold">{{ food.name }}</h2>
+    <p class="text-muted mb-1">🏪 {{ food.restaurant }}</p>
+    <p class="text-muted mb-3">⭐ {{ food.rating }} · ⏱️ {{ food.prep_time }} phút</p>
+    <p>{{ food.description }}</p>
+    <h4 style="color:#FF6B35">{{ "{:,.0f}".format(food.price) }}đ</h4>
+    <button type="button" class="btn btn-primary mt-2" onclick='addToCart(event, {{ food.id }}, {{ food.name|tojson }}, {{ food.price }})'>
+      <i class="bi bi-plus"></i> Thêm vào giỏ
+    </button>
+  </div>
+</div>
+
+{% if related_foods %}
+<hr class="my-4">
+<h5 class="mb-3">Món cùng nhà hàng</h5>
+<div class="row g-3">
+  {% for item in related_foods %}
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{{ url_for('food_detail', food_id=item.id) }}" class="text-decoration-none text-dark">
+      <div class="food-card card h-100">
+        <img src="{{ item.image_url }}" alt="{{ item.name }}" loading="lazy">
+        <div class="card-body">
+          <div class="small text-muted">{{ item.category }}</div>
+          <div class="fw-semibold">{{ item.name }}</div>
+          <div style="color:#FF6B35">{{ "{:,.0f}".format(item.price) }}đ</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showToast(msg) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'position-fixed bottom-0 end-0 p-3';
+    container.style.zIndex = '1100';
+    document.body.appendChild(container);
+  }
+  const t = document.createElement('div');
+  t.className = 'toast show align-items-center text-white border-0';
+  t.style.cssText = 'background:#FF6B35; min-width:220px;';
+  t.innerHTML = '<div class="d-flex"><div class="toast-body">' + msg + '</div></div>';
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+async function addToCart(event, id, name, price) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  try {
+    const response = await fetch('/cart/add', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({food_id: id, name: name, price: price, quantity: 1})
+    });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const data = await response.json();
+    const badge = document.querySelector('.badge-cart');
+    if (badge && data.cart_count !== undefined) badge.textContent = data.cart_count;
+    showToast('Đã thêm "' + name + '" vào giỏ hàng!');
+  } catch (err) {
+    console.error('addToCart error:', err);
+    showToast('Lỗi: không thêm được vào giỏ.');
+  }
+}
+</script>
+{% endblock %}
